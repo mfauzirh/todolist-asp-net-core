@@ -1,8 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using TodoList.Models;
 
-namespace TodoList.Models;
+namespace TodoList.Dtos;
 
-public class User
+public class UserGetDto
 {
     [Required]
     public int Id { get; set; }
@@ -18,12 +19,6 @@ public class User
     [Required]
     [EmailAddress]
     public string Email { get; set; } = null!;
-
-    [Required]
-    public byte[] PasswordHash { get; set; } = Array.Empty<byte>();
-
-    [Required]
-    public byte[] PasswordSalt { get; set; } = Array.Empty<byte>();
 
     [Required]
     public DateTime CreatedAt { get; set; }
