@@ -1,6 +1,7 @@
 using System.Net;
 using AutoMapper;
 using TodoList.Dtos;
+using TodoList.Exceptions;
 using TodoList.Models;
 using TodoList.Repositories;
 
@@ -30,6 +31,8 @@ public class UserService : IUserService
                 response.StatusCode = HttpStatusCode.NotFound;
                 response.Success = false;
                 response.Message = $"Error occurred: User with id '{id}' is not exists.";
+
+                throw new NotFoundException("Error occurred: User with id '{id}' is not exists.");
             }
 
             response.Data = _mapper.Map<UserGetDto>(user);

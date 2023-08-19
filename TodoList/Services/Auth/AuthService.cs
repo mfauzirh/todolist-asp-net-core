@@ -70,6 +70,8 @@ public class AuthService : IAuthService
                 response.Success = false;
                 response.Message = $"Error occurred: User with username '{newUser.UserName}' is already exists";
                 response.StatusCode = HttpStatusCode.Conflict;
+
+                return response;
             }
 
             CreatePasswordHash(newUser.Password, out byte[] passwordHash, out byte[] passwordSalt);
