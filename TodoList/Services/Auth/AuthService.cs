@@ -4,6 +4,7 @@ using System.Security.Claims;
 using AutoMapper;
 using Microsoft.IdentityModel.Tokens;
 using TodoList.Dtos;
+using TodoList.Exceptions;
 using TodoList.Models;
 using TodoList.Repositories;
 
@@ -22,39 +23,26 @@ public class AuthService : IAuthService
         _configuration = configuration;
     }
 
-    public async Task<(ServiceResponse<UserGetDto>, string? token)> Login(UserLoginDto loginUser)
+    public async Task<(ServiceResponse<UserGetDto>, string token)> Login(UserLoginDto loginUser)
     {
         var response = new ServiceResponse<UserGetDto>();
-        string? token = null;
 
-        try
-        {
-            User? user = await _userRepository.GetByUserNameAsync(loginUser.UserName);
+        User? user = await _userRepository.GetByUserNameAsync(loginUser.UserName);
 
-            if (user is null)
-            {
-                response.Success = false;
-                response.Message = $"Error occurred: User with username '{loginUser.UserName}' is not exists";
-                response.StatusCode = HttpStatusCode.NotFound;
-            }
-            else if (!VerifyPasswordHash(loginUser.Password, user.PasswordHash, user.PasswordSalt))
-            {
-                response.Success = false;
-                response.Message = $"Error occurred: wrong password for user with username '{loginUser.UserName}'";
-                response.StatusCode = HttpStatusCode.Unauthorized;
-            }
-            else
-            {
-                response.Data = _mapper.Map<UserGetDto>(user);
-                token = CreateToken(user);
-            }
-        }
-        catch (Exception ex)
+        if (user is null)
         {
-            response.Success = false;
-            response.Message = $"Error occurred: {ex.Message}";
-            response.StatusCode = HttpStatusCode.InternalServerError;
+            throw new NotFoundException(
+                $"Error occurred: User with username '{loginUser.UserName}' is not exists");
         }
+
+        if (!VerifyPasswordHash(loginUser.Password, user.PasswordHash, user.PasswordSalt))
+        {
+            throw new UnauthorizedException(
+                $"Error occurred: wrong password for user with username '{loginUser.UserName}'");
+        }
+
+        string token = CreateToken(user);
+        response.Data = _mapper.Map<UserGetDto>(user);
 
         return (response, token);
     }
@@ -63,39 +51,28 @@ public class AuthService : IAuthService
     {
         var response = new ServiceResponse<UserGetDto>();
 
-        try
+        if (await UserExists(newUser.UserName))
         {
-            if (await UserExists(newUser.UserName))
-            {
-                response.Success = false;
-                response.Message = $"Error occurred: User with username '{newUser.UserName}' is already exists";
-                response.StatusCode = HttpStatusCode.Conflict;
-
-                return response;
-            }
-
-            CreatePasswordHash(newUser.Password, out byte[] passwordHash, out byte[] passwordSalt);
-
-            User user = new()
-            {
-                UserName = newUser.UserName,
-                FullName = newUser.FullName,
-                Email = newUser.Email,
-                PasswordHash = passwordHash,
-                PasswordSalt = passwordSalt,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now
-            };
-
-            User registeredUser = await _userRepository.AddAsync(user);
-            response.Data = _mapper.Map<UserGetDto>(registeredUser);
+            throw new ConflictException(
+                $"Error occurred: User with username '{newUser.UserName}' is already exists"
+            );
         }
-        catch (Exception ex)
+
+        CreatePasswordHash(newUser.Password, out byte[] passwordHash, out byte[] passwordSalt);
+
+        User user = new()
         {
-            response.Success = false;
-            response.Message = $"Error occurred: {ex.Message}";
-            response.StatusCode = HttpStatusCode.InternalServerError;
-        }
+            UserName = newUser.UserName,
+            FullName = newUser.FullName,
+            Email = newUser.Email,
+            PasswordHash = passwordHash,
+            PasswordSalt = passwordSalt,
+            CreatedAt = DateTime.Now,
+            UpdatedAt = DateTime.Now
+        };
+
+        User registeredUser = await _userRepository.AddAsync(user);
+        response.Data = _mapper.Map<UserGetDto>(registeredUser);
 
         return response;
     }

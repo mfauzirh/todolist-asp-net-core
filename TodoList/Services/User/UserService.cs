@@ -22,27 +22,14 @@ public class UserService : IUserService
     {
         var response = new ServiceResponse<UserGetDto>();
 
-        try
+        User? user = await _userRepository.GetByIdAsync(id);
+
+        if (user is null)
         {
-            User? user = await _userRepository.GetByIdAsync(id);
-
-            if (user is null)
-            {
-                response.StatusCode = HttpStatusCode.NotFound;
-                response.Success = false;
-                response.Message = $"Error occurred: User with id '{id}' is not exists.";
-
-                throw new NotFoundException("Error occurred: User with id '{id}' is not exists.");
-            }
-
-            response.Data = _mapper.Map<UserGetDto>(user);
+            throw new NotFoundException($"Error occurred: User with id '{id}' is not exists.");
         }
-        catch (Exception ex)
-        {
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            response.Success = false;
-            response.Message = $"Error occurred: {ex.Message}";
-        }
+
+        response.Data = _mapper.Map<UserGetDto>(user);
 
         return response;
     }

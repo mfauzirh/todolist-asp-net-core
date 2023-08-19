@@ -6,6 +6,6 @@ namespace TodoList.Services;
 public interface IAuthService
 {
     Task<ServiceResponse<UserGetDto>> Register(UserRegisterDto newUser);
-    Task<(ServiceResponse<UserGetDto>, string? token)> Login(UserLoginDto loginUser);
+    Task<(ServiceResponse<UserGetDto>, string token)> Login(UserLoginDto loginUser);
     Task<bool> UserExists(string UserName);
 }

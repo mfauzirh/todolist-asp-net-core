@@ -11,7 +11,9 @@ public class ExceptionHandlerMiddleware
 
     private Dictionary<Type, HttpStatusCode> _exceptionStatusCodes = new()
     {
-        { typeof(NotFoundException), HttpStatusCode.NotFound }
+        { typeof(NotFoundException), HttpStatusCode.NotFound },
+        { typeof(ConflictException), HttpStatusCode.Conflict },
+        { typeof(UnauthorizedAccessException), HttpStatusCode.Unauthorized }
     };
 
     public ExceptionHandlerMiddleware(RequestDelegate next)
@@ -41,7 +43,6 @@ public class ExceptionHandlerMiddleware
             var response = new ServiceResponse<object>
             {
                 Success = false,
-                StatusCode = statusCode,
                 Message = ex.Message,
             };
             return httpContext.Response.WriteAsync(JsonSerializer.Serialize(response));
@@ -51,7 +52,6 @@ public class ExceptionHandlerMiddleware
         var defaultResponse = new ServiceResponse<object>
         {
             Success = false,
-            StatusCode = HttpStatusCode.InternalServerError,
             Message = $"Error Ocurred: {ex.Message}",
         };
         return httpContext.Response.WriteAsync(JsonSerializer.Serialize(defaultResponse));

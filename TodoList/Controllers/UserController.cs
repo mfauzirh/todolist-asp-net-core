@@ -18,14 +18,14 @@ public class UserController : ControllerBase
         _userService = userService;
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id}", Name = "GetUserByIdAsync")]
     [ProducesResponseType(typeof(ServiceResponse<UserGetDto>), 200)]
     [ProducesResponseType(404)]
     [ProducesResponseType(500)]
-    public async Task<ActionResult<ServiceResponse<UserGetDto>>> GetByIdAsync([FromRoute] int id)
+    public async Task<ActionResult<ServiceResponse<UserGetDto>>> GetUserByIdAsync([FromRoute] int id)
     {
         ServiceResponse<UserGetDto> response = await _userService.GetByIdAsync(id);
 
-        return StatusCode((int)response.StatusCode, response);
+        return Ok(response);
     }
 }

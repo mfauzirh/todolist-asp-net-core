@@ -26,7 +26,7 @@ public class AuthController : ControllerBase
             Response.Headers.Add("Authorization", $"Bearer {token}");
         }
 
-        return StatusCode((int)response.StatusCode, response);
+        return Ok(response);
     }
 
     [HttpPost("register")]
@@ -34,6 +34,6 @@ public class AuthController : ControllerBase
     {
         ServiceResponse<UserGetDto> response = await _authService.Register(newUser);
 
-        return StatusCode((int)response.StatusCode, response);
+        return CreatedAtRoute("GetUserByIdAsync", new { id = response.Data!.Id }, response);
     }
 }
