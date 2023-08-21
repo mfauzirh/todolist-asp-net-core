@@ -25,6 +25,4 @@ public class UserGetDto
 
     [Required]
     public DateTime UpdatedAt { get; set; }
-
-    public List<Todo> Todos { get; set; } = new();
 }
