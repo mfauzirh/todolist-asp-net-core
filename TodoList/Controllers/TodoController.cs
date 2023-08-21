@@ -28,7 +28,7 @@ public class TodoController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<ServiceResponse<TodoGetDto>>> GetTodoById(int id)
+    public async Task<ActionResult<ServiceResponse<TodoGetDto>>> GetTodoById([FromRoute] int id)
     {
         var response = await _todoService.GetById(id);
 
@@ -36,15 +36,38 @@ public class TodoController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<ServiceResponse<TodoGetDto>>> AddTodo(TodoCreateDto newTodo)
+    public async Task<ActionResult<ServiceResponse<TodoGetDto>>> AddTodo([FromBody] TodoCreateDto newTodo)
     {
         var response = await _todoService.Add(newTodo);
 
         return StatusCode((int)HttpStatusCode.Created, response);
     }
 
+    [HttpPut]
+    public async Task<ActionResult<ServiceResponse<TodoGetDto>>> UpdateTodo([FromBody] TodoUpdateDto updateTodo)
+    {
+        var response = await _todoService.Update(updateTodo);
+
+        return Ok(response);
+    }
+
+    [HttpPatch("{id}/done")]
+    public async Task<ActionResult<ServiceResponse<TodoGetDto>>> MarkTodoAsDone([FromRoute] int id)
+    {
+        var response = await _todoService.MarkAsDone(id);
+
+        return Ok(response);
+    }
+    [HttpPatch("{id}/not-done")]
+    public async Task<ActionResult<ServiceResponse<TodoGetDto>>> MarkTodoAsNotDone([FromRoute] int id)
+    {
+        var response = await _todoService.MarkAsNotDone(id);
+
+        return Ok(response);
+    }
+
     [HttpDelete]
-    public async Task<ActionResult<ServiceResponse<TodoGetDto>>> DeleteTodo(int id)
+    public async Task<ActionResult<ServiceResponse<TodoGetDto>>> DeleteTodo([FromRoute] int id)
     {
         var response = await _todoService.Delete(id);
 

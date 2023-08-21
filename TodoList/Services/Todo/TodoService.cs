@@ -82,8 +82,67 @@ public class TodoService : ITodoService
         return response;
     }
 
-    public Task<ServiceResponse<TodoGetDto>> Update(TodoUpdateDto updateTodo)
+    public async Task<ServiceResponse<TodoGetDto>> Update(TodoUpdateDto updateTodo)
     {
-        throw new NotImplementedException();
+        var response = new ServiceResponse<TodoGetDto>();
+
+        Todo? todo = await _todoRepository.GetById(updateTodo.Id);
+
+        if (todo is null)
+        {
+            throw new NotFoundException($"Todo with id '{updateTodo.Id}' is not exist.");
+        }
+
+        todo.Title = updateTodo.Title;
+        todo.Description = updateTodo.Description;
+        todo.UpdatedAt = DateTime.Now;
+
+        Todo updatedTodo = await _todoRepository.Update(todo);
+
+        response.Data = _mapper.Map<TodoGetDto>(updatedTodo);
+
+        return response;
+    }
+
+    public async Task<ServiceResponse<TodoGetDto>> MarkAsDone(int id)
+    {
+        var response = new ServiceResponse<TodoGetDto>();
+
+        Todo? todo = await _todoRepository.GetById(id);
+
+        if (todo is null)
+        {
+            throw new NotFoundException($"Todo with id '{id}' is not exist.");
+        }
+
+        todo.Done = true;
+        todo.UpdatedAt = DateTime.Now;
+
+        Todo updatedTodo = await _todoRepository.Update(todo);
+
+        response.Data = _mapper.Map<TodoGetDto>(updatedTodo);
+
+        return response;
+    }
+
+    public async Task<ServiceResponse<TodoGetDto>> MarkAsNotDone(int id)
+    {
+        var response = new ServiceResponse<TodoGetDto>();
+
+        Todo? todo = await _todoRepository.GetById(id);
+
+        if (todo is null)
+        {
+            throw new NotFoundException($"Todo with id '{id}' is not exist.");
+        }
+
+        todo.Done = false;
+        todo.UpdatedAt = DateTime.Now;
+
+        Todo updatedTodo = await _todoRepository.Update(todo);
+
+        response.Data = _mapper.Map<TodoGetDto>(updatedTodo);
+
+        return response;
     }
 }
