@@ -1,4 +1,3 @@
-using System.Net;
 using AutoMapper;
 using TodoList.Dtos;
 using TodoList.Exceptions;
@@ -34,8 +33,19 @@ public class UserService : IUserService
         return response;
     }
 
-    public Task<ServiceResponse<UserGetDto>> GetByUserNameAsync(string userName)
+    public async Task<ServiceResponse<UserGetDto>> GetByUserNameAsync(string userName)
     {
-        throw new NotImplementedException();
+        var response = new ServiceResponse<UserGetDto>();
+
+        User? user = await _userRepository.GetByUserNameAsync(userName);
+
+        if (user is null)
+        {
+            throw new NotFoundException($"Error occurred: User with username '{userName}' is not exists");
+        }
+
+        response.Data = _mapper.Map<UserGetDto>(user);
+
+        return response;
     }
 }

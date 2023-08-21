@@ -28,4 +28,15 @@ public class UserController : ControllerBase
 
         return Ok(response);
     }
+
+    [HttpGet("username/{userName}")]
+    [ProducesResponseType(typeof(ServiceResponse<UserGetDto>), 200)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<ServiceResponse<UserGetDto>>> GetUserByUserNameAsync([FromRoute] string userName)
+    {
+        ServiceResponse<UserGetDto> response = await _userService.GetByUserNameAsync(userName);
+
+        return Ok(response);
+    }
 }
