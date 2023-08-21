@@ -3,6 +3,7 @@ using AutoMapper;
 using TodoList.Dtos;
 using TodoList.Models;
 using TodoList.Repositories;
+using TodoList.Exceptions;
 
 namespace TodoList.Services;
 
@@ -37,14 +38,38 @@ public class TodoService : ITodoService
         return response;
     }
 
-    public Task<ServiceResponse<TodoGetDto>> Delete(int id)
+    public async Task<ServiceResponse<TodoGetDto>> Delete(int id)
     {
-        throw new NotImplementedException();
+        var response = new ServiceResponse<TodoGetDto>();
+
+        Todo? todo = await _todoRepository.GetById(id);
+
+        if (todo is null)
+        {
+            throw new NotFoundException($"Todo with id '{id}' is not exist.");
+        }
+
+        Todo deletedTodo = await _todoRepository.Delete(todo);
+
+        response.Data = _mapper.Map<TodoGetDto>(deletedTodo);
+
+        return response;
     }
 
-    public Task<ServiceResponse<TodoGetDto?>> GetById(int id)
+    public async Task<ServiceResponse<TodoGetDto>> GetById(int id)
     {
-        throw new NotImplementedException();
+        var response = new ServiceResponse<TodoGetDto>();
+
+        Todo? todo = await _todoRepository.GetById(id);
+
+        if (todo is null)
+        {
+            throw new NotFoundException($"Todo with id '{id}' is not exist.");
+        }
+
+        response.Data = _mapper.Map<TodoGetDto>(todo);
+
+        return response;
     }
 
     public async Task<ServiceResponse<IEnumerable<TodoGetDto>>> GetByUserId()

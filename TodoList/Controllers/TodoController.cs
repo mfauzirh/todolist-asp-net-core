@@ -27,11 +27,27 @@ public class TodoController : ControllerBase
         return Ok(response);
     }
 
+    [HttpGet("{id}")]
+    public async Task<ActionResult<ServiceResponse<TodoGetDto>>> GetTodoById(int id)
+    {
+        var response = await _todoService.GetById(id);
+
+        return Ok(response);
+    }
+
     [HttpPost]
     public async Task<ActionResult<ServiceResponse<TodoGetDto>>> AddTodo(TodoCreateDto newTodo)
     {
         var response = await _todoService.Add(newTodo);
 
         return StatusCode((int)HttpStatusCode.Created, response);
+    }
+
+    [HttpDelete]
+    public async Task<ActionResult<ServiceResponse<TodoGetDto>>> DeleteTodo(int id)
+    {
+        var response = await _todoService.Delete(id);
+
+        return Ok(response);
     }
 }
